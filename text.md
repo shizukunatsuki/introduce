@@ -36,7 +36,7 @@ Hi，这里是なつき，这是一篇自我介绍 QAQ
     - 专科、应用日语
     - JLPT N2 /157
 
-## 使用的设备：
+## なつき的设备们：
 
 - Apple mac mini m4 //24+256
     - SOLIDIGM P44 PRO 2T + ASM2464
