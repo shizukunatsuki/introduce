@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>なつき</title>
-    <!-- 初始 favicon (空心圆) -->
+    <!-- Favicon (固定为空心圆) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>○</text></svg>">
     <style>
         /* 引入 Noto Sans SC 字体 */
@@ -16,14 +16,18 @@
             --accent-color: #f08080;
             --bg-color: #fcefed;
             --container-bg-color: #fff;
-            --toc-bg-color: #f8e2e7;
-            --toc-hover-bg-color: #f9d7dd;
-            --toc-border-color: linear-gradient(to bottom, var(--accent-color), var(--toc-bg-color));
-            --button-bg-color: var(--accent-color);
-            --button-hover-bg-color: #e67373;
-            --button-text-color: #fff;
             --box-shadow-color: rgba(0, 0, 0, 0.1);
             --box-shadow: 0 2px 5px var(--box-shadow-color);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* 调整后的流式排版根设置 */
+        html {
+            /* 字体大小在 16px 到 18px 之间平滑缩放，增长率更平缓 */
+            font-size: clamp(16px, 1rem + 0.25vw, 18px);
         }
 
         body {
@@ -33,7 +37,8 @@
             padding: 2%;
             background-color: var(--bg-color);
             color: var(--primary-color);
-            -webkit-tap-highlight-color: transparent; /* 禁用移动端点击高亮 */
+            -webkit-tap-highlight-color: transparent;
+            overflow-wrap: break-word;
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -43,260 +48,88 @@
             line-height: 1.2;
         }
 
-        h1 {
-            font-size: 2em;
-            text-align: center;
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 0.5em;
-            margin-bottom: 1em;
-        }
-
-        h2 { font-size: 1.5em; }
-        h3 { font-size: 1.2em; }
-        h4 { font-size: 1.1em; }
+        /* 使用 rem 单位，使其能够随根字体大小自动缩放 */
+        h1 { font-size: 2.5rem; text-align: center; border-bottom: 2px solid var(--accent-color); padding-bottom: 0.5em; margin-bottom: 1em; }
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.5rem; }
+        h4 { font-size: 1.25rem; }
 
         p { margin-bottom: 1em; }
-
-        ol, ul {
-            margin-top: 0;
-            margin-bottom: 1em;
-        }
-
-        ol ol, ul ul, ol ul, ul ol {
-            margin-bottom: 0;
-        }
+        ol, ul { margin-top: 0; margin-bottom: 1em; }
+        ol ol, ul ul, ol ul, ul ol { margin-bottom: 0; }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
             background-color: var(--container-bg-color);
-            padding: 20px;
+            padding: 25px;
             border-radius: 20px;
             box-shadow: var(--box-shadow);
             position: relative;
         }
 
-        /* 目录容器样式 */
-        .toc-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: auto;
-            max-width: 250px;
-            height: 100%;
-            background-color: var(--toc-bg-color);
-            padding: 20px;
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-            z-index: 1000;
-            transform: translateX(0);
-            box-shadow: 2px 0 5px var(--box-shadow-color);
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
+        /* 处理 Markdown 渲染后可能导致溢出的内容 */
+        .container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
         }
-
-        /* 渐变边框 (使用伪元素) */
-        .toc-container::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: -2px;
-            width: 2px;
-            height: 100%;
-            background: var(--toc-border-color);
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-        }
-
-        /* 隐藏滚动条 */
-        .toc-container::-webkit-scrollbar { width: 0; }
-        .toc-container {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* PC 端折叠状态 */
-        .toc-container.collapsed { transform: translateX(-100%); }
-
-        /* 移动端最大宽度和展开状态 */
-        @media (max-width: 768px) {
-            .toc-container {
-                max-width: 66.66vw;
-                transform: translateX(-100%);
-            }
-            .toc-container.toc-open { transform: translateX(0); }
-            .toc-title { padding-top: calc(5vh + 40px + 10px); }
-        }
-
-        /* PC 端最大宽度 */
-        @media (min-width: 769px){
-            .toc-container{ max-width: 33.33vw; }
-        }
-
-        .toc-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: var(--secondary-color);
-        }
-
-        .toc-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .toc-item { margin-bottom: 5px; }
-
-        .toc-link {
-            text-decoration: none;
-            color: var(--primary-color);
-            display: block;
-            padding: 5px;
+        .container pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            background-color: #f9f9f9;
+            padding: 1em;
             border-radius: 8px;
-            transition: background-color 0.2s ease;
+            overflow-x: auto;
+        }
+        .container table {
+            width: 100%;
+            border-collapse: collapse;
+            display: block;
+            overflow-x: auto;
+        }
+        .container th, .container td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
 
-        .toc-link:hover, .toc-link.active { background-color: var(--toc-hover-bg-color); }
-
-        .toc-item-chapter {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-top: 10px;
-            margin-bottom: 5px;
-        }
-
-        .toc-item-section { margin-left: 1em; }
-
-        /* 目录切换按钮样式 */
-        .toc-toggle {
-            position: fixed;
-            top: 5vh;
-            z-index: 1001;
-            background-color: var(--button-bg-color);
-            color: var(--button-text-color);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            padding: 0;
-            cursor: pointer;
-            transition: background-color 0.2s ease, left 0.3s ease, transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-tap-highlight-color: transparent;
-            box-shadow: var(--box-shadow);
-            transform: translateY(-50%);
-        }
-
-        /* 移动端按钮定位 */
+        /* 响应式布局调整：优化小屏幕下的边距 */
         @media (max-width: 768px) {
-            .toc-toggle{
-                top: 5vh;
-                left: 5vw;
-                transform: translateY(-50%);
+            body {
+                padding: 15px;
+            }
+            .container {
+                padding: 15px;
+                border-radius: 15px;
             }
         }
-
-        .toc-toggle:hover { background-color: var(--button-hover-bg-color); }
-        .toc-toggle:focus { outline: none; }
-
-        /* 菜单图标 */
-        .toc-toggle-icon {
-            width: 20px;
-            height: 2px;
-            background-color: var(--button-text-color);
-            display: block;
-            position: relative;
-            transition: transform 0.3s ease;
-        }
-
-        .toc-toggle-icon::before,
-        .toc-toggle-icon::after {
-            content: '';
-            width: 20px;
-            height: 2px;
-            background-color: var(--button-text-color);
-            display: block;
-            position: absolute;
-            transition: top 0.3s ease, transform 0.3s ease;
-        }
-
-        .toc-toggle-icon::before { top: -6px; }
-        .toc-toggle-icon::after { top: 6px; }
-
-        /* 展开状态的图标 (X) */
-        .toc-open .toc-toggle-icon { background-color: transparent; }
-        .toc-open .toc-toggle-icon::before {
-            top: 0;
-            transform: rotate(45deg);
-        }
-        .toc-open .toc-toggle-icon::after {
-            top: 0;
-            transform: rotate(-45deg);
-        }
-
-        /* 点击动画 */
-        .toc-toggle.clicked { transform: translateY(-50%) scale(1.2); }
     </style>
     <!-- 引入 marked.js 和 Vue 3 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-     <!-- 引入 lodash -->
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 </head>
 <body>
     <div id="app">
-        <!-- 目录切换按钮 -->
-        <button class="toc-toggle" @click="toggleToc" :class="{'toc-open': isTocOpen, 'clicked': isButtonClicked}">
-            <span class="toc-toggle-icon"></span>
-        </button>
-
-        <!-- 目录容器 -->
-        <div class="toc-container" :class="{'collapsed': !isTocOpen && isDesktop, 'toc-open': isTocOpen && !isDesktop}" ref="tocContainerRef">
-            <div class="toc-title">目录</div>
-            <ul class="toc-list">
-                <li v-for="(item, index) in toc" :key="item.id" class="toc-item" :class="item.level === 2 ? 'toc-item-chapter' : 'toc-item-section'">
-                    <a :href="'#' + item.id" class="toc-link" :class="{active: activeSection === item.id}" @click.prevent="scrollToSection(item.id, $event)">{{ item.text }}</a>
-                </li>
-            </ul>
-        </div>
-
         <div class="container">
-             <!-- Markdown 内容 -->
-             <div v-if="isLoading">Loading...</div>
-            <div v-else v-html="renderedMarkdown"></div>
+             <!-- Markdown 内容将被渲染于此 -->
+            <div v-html="renderedMarkdown"></div>
         </div>
     </div>
 
     <script>
-        const { createApp, ref, onMounted, computed, watch, nextTick } = Vue;
-
-        // 生成 favicon URL
-        function getFaviconUrl(icon) {
-            return `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${icon}</text></svg>`;
-        }
+        const { createApp, ref, onMounted, computed } = Vue;
 
         createApp({
             setup() {
                 const markdownContent = ref('');
-                const toc = ref([]);
-                const isTocOpen = ref(window.innerWidth > 768);
-                const activeSection = ref('');
-                const isDesktop = ref(window.innerWidth > 768);
-                const isLoading = ref(false);
-                const tocContainerRef = ref(null); // 目录容器的 DOM 引用
-                const toggleButton = ref(null); // 目录切换按钮的 DOM 引用
-                const isButtonClicked = ref(false);
-                const headingObserver = ref(null); // IntersectionObserver 实例
-
 
                 const renderedMarkdown = computed(() => {
+                    if (!markdownContent.value) return '';
                     return marked.parse(markdownContent.value);
                 });
 
                 const fetchMarkdown = async () => {
-                    isLoading.value = true;
                     try {
                         const response = await fetch('text.md');
                         if (!response.ok) {
@@ -305,152 +138,16 @@
                         markdownContent.value = await response.text();
                     } catch (error) {
                         console.error('Error fetching Markdown:', error);
-                        markdownContent.value = `Error loading content. ${error.message}`;
-                    } finally {
-                        isLoading.value = false;
+                        markdownContent.value = `<h1>内容加载失败</h1><p>请检查 'text.md' 文件是否存在，以及网络连接是否正常。</p><p>错误详情: ${error.message}</p>`;
                     }
                 };
-
-               // 生成目录 (整合 ID 生成逻辑)
-                const generateToc = () => {
-                    const headings = document.querySelectorAll('#app .container h2, #app .container h3, #app .container h4');
-                    const newToc = [];
-                    const idMap = new Map();
-
-                    headings.forEach((heading) => {
-                        let id = heading.textContent.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
-                        let suffix = 1;
-                        let originalId = id;
-                        while (idMap.has(id)) {
-                            id = `${originalId}-${suffix}`;
-                            suffix++;
-                        }
-                        idMap.set(id, true);
-
-                        heading.id = id;
-                        newToc.push({
-                            id: id,
-                            text: heading.textContent,
-                            level: parseInt(heading.tagName.substring(1)),
-                            element: heading
-                        });
-                    });
-                    toc.value = newToc;
-                };
-
-                const toggleToc = () => {
-                    isTocOpen.value = !isTocOpen.value;
-                    isButtonClicked.value = true;
-                    setTimeout(() => {
-                        isButtonClicked.value = false;
-                    }, 300);
-                    if (isDesktop.value) {
-                        nextTick(updateToggleButtonPosition);
-                    }
-                };
-
-                const scrollToSection = (id) => {
-                    const target = toc.value.find(item => item.id === id);
-                    if (!target || !target.element) return;
-
-                    const targetTop = target.element.offsetTop;
-                    const adjustedTop = targetTop;
-
-                    window.scrollTo({
-                        top: adjustedTop,
-                        behavior: 'smooth'
-                    });
-
-                    if (!isDesktop.value) {
-                        setTimeout(() => {
-                            isTocOpen.value = false;
-                        }, 300);
-                    }
-                };
-
-
-                const handleResize = _.throttle(() => {
-                    isDesktop.value = window.innerWidth > 768;
-                    if (isDesktop.value) {
-                        isTocOpen.value = true;
-                    }
-                    updateToggleButtonPosition();
-                }, 300);
-
-                const updateFavicon = (isFocused) => {
-                    const icon = isFocused ? '●' : '○';
-                    document.querySelector('link[rel="icon"]').href = getFaviconUrl(icon);
-                };
-
-                const handleOutsideClick = (event) => {
-                    if (!isDesktop.value && isTocOpen.value) {
-                        const tocElement = tocContainerRef.value;
-                        if (tocElement && !tocElement.contains(event.target) && !toggleButton.value.contains(event.target)) {
-                            isTocOpen.value = false;
-                        }
-                    }
-                };
-
-                const updateToggleButtonPosition = () => {
-                    if (isDesktop.value && tocContainerRef.value && toggleButton.value) {
-                        if (!isTocOpen.value) {
-                            toggleButton.value.style.left = '5vw';
-                        } else {
-                            toggleButton.value.style.left = `calc(${tocContainerRef.value.offsetWidth}px + 5vw)`;
-                        }
-                    }
-                };
-
-                watch(renderedMarkdown, () => {
-                    nextTick(() => {
-                        generateToc();
-                         // 重新观察所有标题
-                        const headings = document.querySelectorAll('#app .container h2, #app .container h3, #app .container h4');
-                        headings.forEach(heading => headingObserver.value.observe(heading));
-                    });
-                });
 
                 onMounted(() => {
                     fetchMarkdown();
-                    tocContainerRef.value = document.querySelector('.toc-container');
-                    toggleButton.value = document.querySelector('.toc-toggle');
-
-                    headingObserver.value = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                            if (entry.isIntersecting) {
-                                activeSection.value = entry.target.id;
-                            }
-                        });
-                    }, {
-                        rootMargin: '-10% 0px -90% 0px',
-                        threshold: 0.1
-                    });
-
-                    // 首次观察所有标题
-                    const headings = document.querySelectorAll('#app .container h2, #app .container h3, #app .container h4');
-                    headings.forEach(heading => headingObserver.value.observe(heading));
-
-                    window.addEventListener('resize', handleResize);
-                    window.addEventListener('focus', () => updateFavicon(true));
-                    window.addEventListener('blur', () => updateFavicon(false));
-                    document.addEventListener('click', handleOutsideClick);
-
-                    window.onload = () => {
-                        updateToggleButtonPosition();
-                    };
                 });
 
                 return {
-                    renderedMarkdown,
-                    toc,
-                    isTocOpen,
-                    activeSection,
-                    isDesktop,
-                    isLoading,
-                    toggleToc,
-                    scrollToSection,
-                    isButtonClicked,
-                    tocContainerRef // 暴露给模板
+                    renderedMarkdown
                 };
             }
         }).mount('#app');
